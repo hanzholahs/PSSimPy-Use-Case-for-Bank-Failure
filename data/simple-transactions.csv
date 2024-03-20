@@ -1,0 +1,4 @@
+sender_account,receipient_account,amount,day,time
+acc1,acc2,250,1,08:45
+acc2,acc3,100,1,09:00
+acc1,acc3,110,10,09:15
