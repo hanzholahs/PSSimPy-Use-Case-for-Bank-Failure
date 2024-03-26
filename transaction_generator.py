@@ -22,6 +22,7 @@ def generate_random_transactions(num_days = 5,
                                  open_time = '08:00',
                                  close_time = '12:00',
                                  num_banks = 5,
+                                 num_big_banks = 2,
                                  min_bal = 100,
                                  max_bal = 300,
                                  min_txn_count = 5,
@@ -30,7 +31,7 @@ def generate_random_transactions(num_days = 5,
                                  max_txn_value = 50,
                                  seed = 123,
                                 ):
-    np.random.seed(123)
+    np.random.seed(seed)
     
     # generate banks
     banks = {'name': [f'b{i}' for i in range(1, num_banks+1)],
@@ -40,16 +41,17 @@ def generate_random_transactions(num_days = 5,
     # generate accounts
     accounts = {'id': [f'acc{i}' for i in range(1, num_banks+1)],
                 'owner': [f'b{i}' for i in range(1, num_banks+1)],
-                'balance': [np.random.randint(min_bal, max_bal) for _ in range(1, num_banks+1)]}
+                'balance': [np.random.randint(min_bal, max_bal) + (i<=num_banks) * 5 * min_bal 
+                            for i in range(1, num_banks+1)]}
     accounts = pd.DataFrame(accounts)
     
     # generate transactions
     transactions = []
 
     for day in range(1, num_days+1):
-        for bank_1 in range(1, num_banks+1):
-            for bank_2 in range(1, num_banks+1):
-                if bank_1 == bank_2: continue
+        for sender_bank in range(1, num_banks+1):
+            for recipient_bank in range(1, num_banks+1):
+                if sender_bank == recipient_bank: continue
                 num_txn = np.random.randint(min_txn_count, max_txn_count)
                 for _ in range(num_txn):
                     amount = (max_txn_value-min_txn_value) * np.random.random() + min_txn_value
@@ -58,8 +60,8 @@ def generate_random_transactions(num_days = 5,
                         'day': day,
                         'time': random_time(time.fromisoformat(open_time),
                                             time.fromisoformat(close_time)),
-                        'sender_account': 'acc'+str(bank_1),
-                        'receipient_account': 'acc'+str(bank_2),
+                        'sender_account': 'acc'+str(sender_bank),
+                        'receipient_account': 'acc'+str(recipient_bank),
                         'amount': int(np.round(amount)),
                     })
                     
